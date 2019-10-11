@@ -3,5 +3,5 @@
   "channel": "#myChannel",
   "keyword": "shush",
   "phrase": "@here Please keep your voices down... :shushing_face:'",
-  "use_image": true
+  "useimages": true
 }
