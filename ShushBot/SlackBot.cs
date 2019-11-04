@@ -13,10 +13,12 @@ namespace ShushBot
     /// </summary>
     public class SlackBot
     {
+        private readonly TimeSpan timeToWaitBetweenMessages = TimeSpan.FromMinutes(3);
         private readonly SlackBotSettings settings;
 
         private SlackChatHub channel;
         private ISlackConnection connection;
+        private DateTimeOffset lastMessageSent = DateTimeOffset.MinValue;
 
         /// <summary>
         /// Creates a new slack bot based on supplied settings. Does not connect to slack yet.
@@ -63,7 +65,20 @@ namespace ShushBot
         {
             if (string.Equals(message.Text, settings.Keyword, StringComparison.CurrentCultureIgnoreCase))
             {
-                await Shush();
+                if (lastMessageSent + timeToWaitBetweenMessages < DateTimeOffset.Now)
+                {
+                    await Shush();
+                }
+                else
+                {
+                    var timeDelta = lastMessageSent + timeToWaitBetweenMessages - DateTimeOffset.Now;
+                    var reply = $"Det er ikke så lenge siden jeg sa i fra. Vennligst vent {timeDelta:mm\\:ss}";
+                    await connection.Say(new BotMessage
+                    {
+                        Text = reply,
+                        ChatHub = new SlackChatHub { Id = message.User.Id, Type = SlackChatHubType.DM }
+                    });
+                }
             }
         }
 
@@ -87,6 +102,7 @@ namespace ShushBot
             }
 
             await connection.Say(message);
+            lastMessageSent = DateTimeOffset.Now;
         }
     }
 }

@@ -1,0 +1,19 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build docker image
+      run: |
+        chmod +x scripts/build.sh
+        chmod +x scripts/push.sh
+        ./scripts/build.sh
+        ./scripts/push ${{ secrets.DOCKER_HUB_USER }} ${{ secrets.DOCKER_HUB_PW }}
+      shell: bash
